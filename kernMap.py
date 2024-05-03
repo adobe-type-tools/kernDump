@@ -115,6 +115,16 @@ def make_kern_map(ufo, cell_size=5, format=None):
 
     elif format == 'canvas':
 
+        # A canvas can have a maxium area of 268 435 456 pixels.
+        # Since we are dealing with hidpi canvas, the actual useable pixels
+        # are 268 435 456 / 4 = 67 108 864
+        canvas_area = (len(g_order) * cell_size) ** 2 * 4
+        if canvas_area > 128 ** 4:
+            print(
+                'The canvas is too large and may not render.\n'
+                'Try decreasing the cell size (option -c).'
+            )
+
         with open('kernMap templates/canvas_prologue.html', 'r') as html_pro:
             canvas_prologue = Template(html_pro.read())
         with open('kernMap templates/canvas_epilogue.html', 'r') as html_epi:
