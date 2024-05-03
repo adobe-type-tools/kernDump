@@ -1,7 +1,9 @@
 '''
 Simple map to illustrate kerning topography.
-HTML canvas is interactive, and allows “exploring” a kern map.
-pixel and svg output images may serve as a kerning “fingerprint”.
+
+By default, the output is an interactive html `canvas`, for exploration of the
+kerning map. Use `pixel` or `svg` formats to obtain a fingerprint of the
+kerning data.
 
 '''
 
@@ -10,11 +12,12 @@ import argparse
 import colorsys
 
 from defcon import Font
+from fontTools.ttLib import TTFont
 from pathlib import Path
 from string import Template
 from PIL import Image, ImageDraw
 
-import getKerningPairsFromUFO
+from dumpkerning import extractKerning
 
 
 def get_args():
@@ -83,23 +86,43 @@ def kern_color(k_value, min_value, max_value, hex_values=False):
         return r, g, b
 
 
-def make_kern_map(ufo, cell_size=5, format=None):
-    f = Font(ufo)
-    g_order = f.glyphOrder
-    basename = Path(ufo).stem
-    ukr = getKerningPairsFromUFO.UFOkernReader(f, includeZero=True)
-    all_kerned_pairs = ukr.allKerningPairs
+def get_glyph_order(input_path):
+    '''
+    depending on the input file, getting to the glyph order may be different.
+
+    '''
+    if input_path.suffix == '.ufo':
+        f = Font(input_path)
+        return f.glyphOrder
+    elif input_path.suffix in ['.otf', '.ttf']:
+        f = TTFont(input_path)
+        return f.getGlyphOrder()
+    else:
+        # fea files don’t imply a glyph order, so this is just sorting all the
+        # used glyphs alphabetically
+        from getKerningPairsFromFEA import FEAKernReader
+        fkr = FEAKernReader(input_path)
+        found_pairs = fkr.flatKerningPairs.keys()
+        all_glyphs = set([glyph for pair in found_pairs for glyph in pair])
+        return sorted(all_glyphs)
+
+
+def make_kern_map(input_file, cell_size=5, format=None):
+    input_path = Path(input_file)
+    glyph_order = get_glyph_order(input_path)
+    basename = input_path.stem
+    all_kerned_pairs = extractKerning(input_path)
     kern_values = list(all_kerned_pairs.values())
     k_min = min(kern_values)
     k_max = max(kern_values)
 
     if format == 'pixel':
 
-        size_in_px = len(g_order) * cell_size
+        size_in_px = len(glyph_order) * cell_size
         img = Image.new('RGB', (size_in_px, size_in_px), '#fff')
 
-        for row_index, g_name_a in enumerate(g_order):
-            for col_index, g_name_b in enumerate(g_order):
+        for row_index, g_name_a in enumerate(glyph_order):
+            for col_index, g_name_b in enumerate(glyph_order):
                 kv = all_kerned_pairs.get((g_name_a, g_name_b), None)
                 x = row_index * cell_size
                 y = col_index * cell_size
@@ -118,7 +141,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
         # A canvas can have a maxium area of 268 435 456 pixels.
         # Since we are dealing with hidpi canvas, the actual useable pixels
         # are 268 435 456 / 4 = 67 108 864
-        canvas_area = (len(g_order) * cell_size) ** 2 * 4
+        canvas_area = (len(glyph_order) * cell_size) ** 2 * 4
         if canvas_area > 128 ** 4:
             print(
                 'The canvas is too large and may not render.\n'
@@ -133,7 +156,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
 
         sorted_pairs = sorted(
             all_kerned_pairs.keys(),
-            key=lambda x: (g_order.index(x[0]), g_order.index(x[1])))
+            key=lambda x: (glyph_order.index(x[0]), glyph_order.index(x[1])))
         neg_kerned_pairs = [
             p for p in sorted_pairs if all_kerned_pairs.get(p) <= 0]
         pos_kerned_pairs = [
@@ -142,8 +165,8 @@ def make_kern_map(ufo, cell_size=5, format=None):
         canvas.append(
             '                context.fillStyle = "#f00";')
         for left, right in neg_kerned_pairs:
-            pair_index_l = g_order.index(left)
-            pair_index_r = g_order.index(right)
+            pair_index_l = glyph_order.index(left)
+            pair_index_r = glyph_order.index(right)
             canvas.append(
                 '                context.fillRect('
                 f'{pair_index_l} * STEP, '
@@ -152,8 +175,8 @@ def make_kern_map(ufo, cell_size=5, format=None):
         canvas.append(
             '                context.fillStyle = "#0f0";')
         for left, right in pos_kerned_pairs:
-            pair_index_l = g_order.index(left)
-            pair_index_r = g_order.index(right)
+            pair_index_l = glyph_order.index(left)
+            pair_index_r = glyph_order.index(right)
             canvas.append(
                 '                context.fillRect('
                 f'{pair_index_l} * STEP, '
@@ -166,7 +189,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
 
         header_content = {
             'base_name': basename,
-            'glyph_order': ' '.join(g_order),
+            'glyph_order': ' '.join(glyph_order),
             'cell_size': cell_size,
             'kerning_data': ' '.join(flat_kern_items),
         }
@@ -187,7 +210,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
         svg_prologue = (
             '<svg version="1.1" width="{0}" height="{0}" '
             'xmlns="http://www.w3.org/2000/svg">\n'.format(
-                len(g_order) * rect_size)
+                len(glyph_order) * rect_size)
         )
         svg_epilogue = (
             '</svg>\n'
@@ -197,8 +220,8 @@ def make_kern_map(ufo, cell_size=5, format=None):
         )
 
         svg = []
-        for row_index, g_name_a in enumerate(g_order):
-            for col_index, g_name_b in enumerate(g_order):
+        for row_index, g_name_a in enumerate(glyph_order):
+            for col_index, g_name_b in enumerate(glyph_order):
                 x, y = row_index * rect_size, col_index * rect_size
                 # pair = f'{g_name_a} {g_name_b}'
                 kv = all_kerned_pairs.get((g_name_a, g_name_b), None)
