@@ -11,6 +11,7 @@ import colorsys
 
 from defcon import Font
 from pathlib import Path
+from string import Template
 from PIL import Image, ImageDraw
 
 import getKerningPairsFromUFO
@@ -114,7 +115,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
     elif format == 'canvas':
 
         with open('kernMap templates/canvas_prologue.html', 'r') as html_pro:
-            canvas_prologue = html_pro.read()
+            canvas_prologue = Template(html_pro.read())
         with open('kernMap templates/canvas_epilogue.html', 'r') as html_epi:
             canvas_epilogue = html_epi.read()
         canvas = []
@@ -154,7 +155,7 @@ def make_kern_map(ufo, cell_size=5, format=None):
         }
 
         full_html = (
-            canvas_prologue.format(**header_content) +
+            canvas_prologue.safe_substitute(header_content) +
             '\n'.join(canvas) +
             canvas_epilogue
         )

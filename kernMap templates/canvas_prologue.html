@@ -3,26 +3,26 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>{base_name}</title>
+        <title>$base_name</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style type="text/css">
-            body {{
+            body {
                 margin: 0;
-            }}
-            .log {{
+            }
+            .log {
               font-family: "Source Code Pro", ui-monospace, monospace;
               font-size: 16pt;
               position: fixed;
               width: 100%;
               background-color: white;
               border: 8px solid white;
-            }}
-            canvas {{
+            }
+            canvas {
                 margin-top: 42px;
                 cursor: crosshair;
                 position: inherit;
-            }};
+            };
             </style>
     </head>
     <body>
@@ -32,11 +32,11 @@
         <script type="text/javascript">
             const log = document.querySelector(".log");
             var canvas;
-            var STEP = {cell_size};
-            let glyphs = "{glyph_order}";
+            var STEP = $cell_size;
+            let glyphs = "$glyph_order";
             var GLYPH_ARRAY = glyphs.split(" ");
             var NUM_GLYPHS = GLYPH_ARRAY.length;
-            var PIXEL_RATIO = (function () {{
+            var PIXEL_RATIO = (function () {
                 var ctx = document.createElement("canvas").getContext("2d"),
                     dpr = window.devicePixelRatio || 1,
                     bsr = ctx.webkitBackingStorePixelRatio ||
@@ -46,12 +46,12 @@
                           ctx.backingStorePixelRatio || 1;
 
                 return dpr / bsr;
-            }})();
+            })();
 
-            function createHiDPICanvas(w, h, ratio) {{
-                if (!ratio) {{
+            function createHiDPICanvas(w, h, ratio) {
+                if (!ratio) {
                     ratio = PIXEL_RATIO;
-                }}
+                }
                 var can = document.createElement("canvas");
                 can.width = w * ratio;
                 can.height = h * ratio;
@@ -59,43 +59,43 @@
                 can.style.height = h + "px";
                 can.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
                 return can;
-            }}
+            }
 
-            function getPairForCursorPosition(e, step) {{
+            function getPairForCursorPosition(e, step) {
                 var x;
                 var y;
-                if (e.pageX != undefined && e.pageY != undefined) {{
+                if (e.pageX != undefined && e.pageY != undefined) {
                     x = e.pageX;
                     y = e.pageY;
-                }} else {{
+                } else {
                     x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
                     y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                }}
+                }
                 x -= canvas.offsetLeft;
                 y -= canvas.offsetTop;
                 var x_box = Math.floor(x/step);
                 var y_box = Math.floor(y/step);
                 var glyph_x = GLYPH_ARRAY[x_box];
                 var glyph_y = GLYPH_ARRAY[y_box];
-                log.innerText = `${{glyph_x}} | ${{glyph_y}}`
-            }}
+                log.innerText = `${glyph_x} | ${glyph_y}`
+            }
 
-            function resetLog() {{
+            function resetLog() {
                 log.innerText = '_ | _';
-            }}
+            }
 
-            function draw(canvas, i) {{
+            function draw(canvas, i) {
                 var context = canvas.getContext("2d");
                 context.fillStyle = "white";
                 context.fillRect(0, 0, canvas.width, canvas.height);
-                for (var x = 0; x <= canvas.width; x += STEP) {{
+                for (var x = 0; x <= canvas.width; x += STEP) {
                   context.moveTo(x, 0);
                   context.lineTo(x, canvas.height);
-                }}
-                for (var y = 0; y <= canvas.height; y += STEP) {{
+                }
+                for (var y = 0; y <= canvas.height; y += STEP) {
                   context.moveTo(0, y);
                   context.lineTo(canvas.width, y);
-                }}
+                }
 
                 context.strokeStyle = "#eee";
                 context.stroke();
