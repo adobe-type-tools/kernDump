@@ -3,8 +3,7 @@
 # kernDump
 Various scripts for analyzing, reading and writing kerning information. These
 can be helpful for analyzing kerning (and the loss thereof) through various
-stages of font production.  
-Some of these tools have been presented at [ATypI Amsterdam 2013](https://atypi.org/presentation/yearning-for-kerning/).
+stages of font production. Some of these tools have been presented at [ATypI Amsterdam 2013](https://atypi.org/presentation/yearning-for-kerning/).
 
 ---
 
@@ -14,7 +13,7 @@ Extracts kerning and groups from a compiled OTF and injects them into a new UFO 
 __Dependencies:__ `getKerningPairsFromOTF.py` (same repo), [fontTools](https://github.com/fonttools/fonttools), `tx` (Part of the [Adobe FDK](https://github.com/adobe-type-tools/afdko))  
 __Environment:__ command line
 ```zsh
-python convertKernedOTFtoKernedUFO.py font.otf
+python3 convertKernedOTFtoKernedUFO.py font.otf
 ```
 
 ---
@@ -25,9 +24,9 @@ Just van Rossum wrote this script. It imports all of the `getKerningPairsFromXXX
 __Dependencies:__ `getKerningPairsFromFEA.py`, `getKerningPairsFromOTF.py`, `getKerningPairsFromUFO.py` (same repo)  
 __Environment:__ command line
 ```zsh
-python dumpkerning.py font.otf
-python dumpkerning.py font.ufo
-python dumpkerning.py kern.fea
+python3 dumpkerning.py font.otf
+python3 dumpkerning.py font.ufo
+python3 dumpkerning.py kern.fea
 ```
 
 ---
@@ -42,8 +41,8 @@ __Dependencies:__ None
 __Environment:__ command line
 
 ```zsh
-python getKerningPairsFromFEA.py kern.fea
-python getKerningPairsFromFEA.py -go <path to GlyphOrderAndAliasDB file> kern.fea
+python3 getKerningPairsFromFEA.py kern.fea
+python3 getKerningPairsFromFEA.py -go <path to GlyphOrderAndAliasDB file> kern.fea
 
 ```
 
@@ -57,8 +56,8 @@ __Dependencies:__ [fontTools](https://github.com/behdad/fonttools)
 __Environment:__ command line
 
 ```zsh
-python getKerningPairsFromOTF.py font.otf
-python getKerningPairsFromOTF.py font.ttf
+python3 getKerningPairsFromOTF.py font.otf
+python3 getKerningPairsFromOTF.py font.ttf
 ```
 
 ---
@@ -71,7 +70,7 @@ __Dependencies:__ [defcon](https://github.com/typesupply/defcon) or Robofont
 __Environment:__ command line or Robofont
 
 ```zsh
-python getKerningPairsFromUFO.py font.ufo
+python3 getKerningPairsFromUFO.py font.ufo
 ```
 
 ---
@@ -93,3 +92,17 @@ __Dependencies:__ `getKerningPairsFromUFO.py` (above)
 __Environment:__ Robofont
 
 <img src="kernInfoWindow.png" width="412" height="384" alt="Kern Info Window" />
+
+---
+
+### `kernMap.py`
+Simple map to illustrate kerning topography.
+
+By default, the output is an interactive html `canvas`, for exploration of the
+kerning map. Use `pixel` or `svg` formats to obtain a fingerprint of the
+kerning data.
+
+__Environment:__ command line
+
+<img src="kernmap_canvas.png" alt="KernMap canvas" />
+<img src="kernmap_pixel.png" alt="KernMap pixel" />
