@@ -61,7 +61,7 @@ def kern_color(k_value, min_value, max_value, hex_values=False):
     '''
     assign a color based on kerning intensity
     '''
-    # saturation is at least 50%
+    # saturation is at least 50%, otherwise hard to see
     sat = 0.5
     val = 1
     if k_value == 0:
@@ -69,6 +69,7 @@ def kern_color(k_value, min_value, max_value, hex_values=False):
         sat = 0
     elif k_value < 0:
         hue = (1 / 360) * 0
+        # increase saturation by up to 50%
         sat += k_value / min_value / 2
     else:
         hue = (1 / 360) * 180
@@ -148,10 +149,16 @@ def make_kern_map(ufo, cell_size=5, format=None):
                 f'{pair_index_l} * STEP, '
                 f'{pair_index_r} * STEP, STEP, STEP)')
 
+        # XXX this is a bit janky (and writes a lot of data into the html) --
+        # but it works for now.
+        flat_kern_items = [
+            f'"{" ".join(p)}": {v},' for (p, v) in all_kerned_pairs.items()]
+
         header_content = {
             'base_name': basename,
             'glyph_order': ' '.join(g_order),
-            'cell_size': cell_size
+            'cell_size': cell_size,
+            'kerning_data': ' '.join(flat_kern_items),
         }
 
         full_html = (
@@ -198,6 +205,5 @@ def make_kern_map(ufo, cell_size=5, format=None):
 
 
 if __name__ == '__main__':
-
     args = get_args()
     make_kern_map(args.input_ufo, args.cell_size, args.format)

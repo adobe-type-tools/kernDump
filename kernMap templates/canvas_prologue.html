@@ -34,6 +34,9 @@
             var canvas;
             var STEP = $cell_size;
             let glyphs = "$glyph_order";
+            const KERNING = {
+                $kerning_data
+            };
             var GLYPH_ARRAY = glyphs.split(" ");
             var NUM_GLYPHS = GLYPH_ARRAY.length;
             var PIXEL_RATIO = (function () {
@@ -77,7 +80,13 @@
                 var y_box = Math.floor(y/step);
                 var glyph_x = GLYPH_ARRAY[x_box];
                 var glyph_y = GLYPH_ARRAY[y_box];
-                log.innerText = `${glyph_x} | ${glyph_y}`
+                var pair = `${glyph_x} ${glyph_y}`
+                var value = KERNING[pair];
+                if (value) {
+                    log.innerText = `${glyph_x} | ${glyph_y} (${value})`
+                } else {
+                    log.innerText = `${glyph_x} | ${glyph_y}`
+                }
             }
 
             function resetLog() {
