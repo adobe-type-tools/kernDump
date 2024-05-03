@@ -25,7 +25,7 @@ class VFBkernReader(object):
 
     def makeOutput(self, kerningDict):
         output = []
-        for (left, right), value in kerningDict.items():
+        for (left, right), value in list(kerningDict.items()):
             output.append('/%s /%s %s' % (left, right, value))
         output.sort()
         return output
@@ -39,7 +39,7 @@ class VFBkernReader(object):
     def makePairDicts(self, includeZero):
         kerningPairs = {}
 
-        for (left, right), value in self.kerning.items():
+        for (left, right), value in list(self.kerning.items()):
 
             if '@' in left and '@' in right:
                 # group-to-group-pair
@@ -120,7 +120,7 @@ class FLKerningData(object):
                     break
                 else:
                     keyGlyphName = markedGlyphList[0]
-                    print "\tWARNING: Kerning class %s has no explicit key glyph.\n\tUsing first glyph found (%s)." % (cString, keyGlyphName)
+                    print("\tWARNING: Kerning class %s has no explicit key glyph.\n\tUsing first glyph found (%s)." % (cString, keyGlyphName))
 
             self.groupOrder.append(OTgroupName)
             self.groupToKeyglyph[OTgroupName] = keyGlyphName
@@ -191,8 +191,8 @@ def run():
     vkr = VFBkernReader(kD.groups, kD.kerning)
     # vkr = VFBkernReader(kD.groups, kD.kerning, includeZero=True)
 
-    print '\n'.join(vkr.output), '\n'
-    print 'Total amount of kerning pairs:', len(vkr.output)
+    print('\n'.join(vkr.output), '\n')
+    print('Total amount of kerning pairs:', len(vkr.output))
 
     dumpFileName = f.file_name + '.kerndump'
     dumpFile = open(dumpFileName, 'w')
@@ -200,7 +200,7 @@ def run():
         dumpFile.write("%s %s %s\n" % (g1, g2, v))
     dumpFile.close()
 
-    print '\nList of kerning pairs written to\n{}'.format(dumpFileName)
+    print('\nList of kerning pairs written to\n{}'.format(dumpFileName))
 
 
 if __name__ == '__main__':
