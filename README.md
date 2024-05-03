@@ -77,7 +77,7 @@ python3 getKerningPairsFromUFO.py font.ufo
 
 ### `getKerningPairsFromVFB.py`
 Extract a list of all (flat) kerning pairs from a VFB’s kern object, and
-report the absolute number of pairs. Run as a FontLab script.
+report the absolute number of pairs. Run as a FontLab script. (not tested in several years)
 
 __Dependencies:__ [FontLab 5](http://old.fontlab.com/font-editor/fontlab-studio/)  
 __Environment:__ FontLab Studio 5
@@ -101,6 +101,9 @@ Simple map to illustrate kerning topography.
 By default, the output is an interactive html `canvas`, for exploration of the
 kerning map. Use `pixel` or `svg` formats to obtain a fingerprint of the
 kerning data.
+
+An optional glyph list can be supplied (one glyph name per line), which will
+influence the size of the kerning map, and override the built-in glyph order.
 
 __Environment:__ command line
 

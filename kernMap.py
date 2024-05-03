@@ -5,6 +5,9 @@ By default, the output is an interactive html `canvas`, for exploration of the
 kerning map. Use `pixel` or `svg` formats to obtain a fingerprint of the
 kerning data.
 
+An optional glyph list can be supplied (one glyph name per line), which will
+influence the size of the kerning map, and override the built-in glyph order.
+
 '''
 
 
@@ -26,8 +29,8 @@ def get_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        'input_ufo',
-        help='input UFO',
+        'input_file',
+        help='input file',
         action='store',
     )
     parser.add_argument(
@@ -43,6 +46,12 @@ def get_args():
         default=5,
         action='store',
         type=int,
+    )
+    parser.add_argument(
+        '-g', '--glyph_list',
+        help='supply optional glyph list file',
+        default=False,
+        action='store',
     )
     return parser.parse_args()
 
@@ -88,7 +97,8 @@ def kern_color(k_value, min_value, max_value, hex_values=False):
 
 def get_glyph_order(input_path):
     '''
-    depending on the input file, getting to the glyph order may be different.
+    Depending on the input file, the approach for getting to the glyph order
+    may differ.
 
     '''
     if input_path.suffix == '.ufo':
@@ -107,11 +117,27 @@ def get_glyph_order(input_path):
         return sorted(all_glyphs)
 
 
-def make_kern_map(input_file, cell_size=5, format=None):
+def read_glyph_list(glyph_list_file):
+    with open(glyph_list_file, 'r') as blob:
+        glyph_list = blob.read().splitlines()
+    return glyph_list
+
+
+def make_kern_map(input_file, cell_size=5, glyph_list=None, format=None):
+
     input_path = Path(input_file)
-    glyph_order = get_glyph_order(input_path)
+    kerning = extractKerning(input_path)
+
+    if glyph_list:
+        glyph_order = read_glyph_list(glyph_list)
+        all_kerned_pairs = {
+            pair: value for pair, value in kerning.items() if
+            set(pair) < set(glyph_order)}
+    else:
+        glyph_order = get_glyph_order(input_path)
+        all_kerned_pairs = kerning
+
     basename = input_path.stem
-    all_kerned_pairs = extractKerning(input_path)
     kern_values = list(all_kerned_pairs.values())
     k_min = min(kern_values)
     k_max = max(kern_values)
@@ -239,4 +265,4 @@ def make_kern_map(input_file, cell_size=5, format=None):
 
 if __name__ == '__main__':
     args = get_args()
-    make_kern_map(args.input_ufo, args.cell_size, args.format)
+    make_kern_map(args.input_file, args.cell_size, args.glyph_list, args.format)
