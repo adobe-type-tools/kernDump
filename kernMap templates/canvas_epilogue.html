@@ -1,0 +1,22 @@
+
+            }
+
+            function getKerningPair(e) {
+                var POSITION = getPairForCursorPosition(e, STEP)
+            }
+
+            $(function() {
+                var j = 0;
+                canvas = createHiDPICanvas(NUM_GLYPHS * STEP, NUM_GLYPHS * STEP);
+                canvas.addEventListener("mousemove", getKerningPair, false);
+                canvas.addEventListener("mouseenter", getKerningPair, false);
+                canvas.addEventListener("mouseleave", resetLog, false);
+                $("body").append(canvas);
+                draw(canvas, j);
+            });
+        </script>
+
+    </body>
+</html>
+
+
